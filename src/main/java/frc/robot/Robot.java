@@ -78,13 +78,13 @@ public class Robot extends IterativeRobot {
     winchMotor.setInverted(true);
     winchEncoder= new Encoder(1, 2);
     compressor = new Compressor(0);
-    // intake = new DoubleSolenoid(,);
-    // intakeSlider = new DoubleSolenoid(,);
+    intake = new DoubleSolenoid(0, 1);
+    intakeSlider = new DoubleSolenoid(2, 3);
     elevatorTopSwitch = new DigitalInput(8);
     elevatorBottomSwitch = new DigitalInput(9);
     controller = new XboxController(0);
     pidController = new PIDController(.7, 0, 0, winchEncoder, winchMotor);
-    pidController.setSetpoint(1.0);
+    pidController.setSetpoint(0.9);
     pidController.setPercentTolerance(15.0);
     // vision = new VisionProcessing();
     compressor.start();
@@ -164,7 +164,7 @@ public class Robot extends IterativeRobot {
     }
     
     if(controller.getAButtonReleased()) {
-      lift.frontPostUp(0);
+      lift.frontPostUpStop();
     }
 
     if(controller.getBButton()) {
@@ -172,15 +172,15 @@ public class Robot extends IterativeRobot {
     }
     
     if(controller.getBButtonReleased()) {
-      lift.backPostUp(0);
+      lift.backPostUpStop();
     }
 
     if(controller.getXButton()) {
-      
+      lift.backBrakeEngage();
     }
     
     if(controller.getYButton()) {
-
+      lift.backBrakeDisengage();
     }
     
     if(controller.getBumper(Hand.kLeft)) { // Go down
@@ -201,20 +201,28 @@ public class Robot extends IterativeRobot {
       winchMotor.set(0);
     }
     
-    if(elevatorTopSwitch.get()) {
-      winchMotor.set(0);
-    }
+    // if(!elevatorTopSwitch.get()) {
+      // winchMotor.set(0);
+    // }
 
-    if(elevatorBottomSwitch.get()) {
-      winchMotor.set(0);
-    }
+    // if(!elevatorBottomSwitch.get()) {
+      // winchMotor.set(0);
+    // }
 
     if(leftTrigger > 0.0) {
       lift.liftRobotUp(leftTrigger);
     }
 
+    if(leftTrigger == 0.0) {
+      lift.liftRobotUpStop();
+    }
+
     if(rightTrigger > 0.0) {
       lift.backPostDown(rightTrigger);
+    }
+
+    if(rightTrigger == 0.0) {
+      lift.backPostDownStop();
     }
 
     if(dPad == 0) {

@@ -35,8 +35,8 @@ public class Lift {
         leftDriveMotor= new WPI_VictorSPX(idLeftDriveMotor);
         rightDriveMotor= new WPI_VictorSPX(idRightDriveMotor);
         liftMotors = new SpeedControllerGroup(frontLiftMotor, backLiftMotor);
-        // frontLiftBrake = new DoubleSolenoid(0, 0);
-        // backLiftBrake = new DoubleSolenoid(0, 0);
+        frontLiftBrake = new DoubleSolenoid(6, 7);
+        backLiftBrake = new DoubleSolenoid(4, 5);
         leftDriveMotor.follow(rightDriveMotor);
     }
     
@@ -50,6 +50,14 @@ public class Lift {
                     Thread.sleep(500);
                 } catch (InterruptedException e) { }
                 liftMotors.set(1);
+            }
+        }.start();
+    }
+
+    public void liftRobotUpStop() {
+        new Thread() {
+            public void run() {
+                liftMotors.set(0);
                 frontBrakeEngage();
                 backBrakeEngage();
                 try {
@@ -58,6 +66,7 @@ public class Lift {
             }
         }.start();
     }
+    
     public void robotDown() { //Bring both wheels back in at the same time, lowering the bot
         liftEngaged = false;
         new Thread() {
@@ -68,6 +77,14 @@ public class Lift {
                     Thread.sleep(500);
                 } catch (InterruptedException e) { }
                 liftMotors.set(-1);
+            }
+        }.start();
+    }   
+    
+    public void robotDownStop() {
+        new Thread() {
+            public void run() {
+                liftMotors.set(0);
                 frontBrakeEngage();
                 backBrakeEngage();
                 try {
@@ -75,8 +92,8 @@ public class Lift {
                 } catch (InterruptedException e) { }
             }
         }.start();
-    }   
-    
+    }
+
     public void frontPostDown(double speed) { //Put down only this set of wheels
         new Thread() {
             public void run() {
@@ -85,6 +102,14 @@ public class Lift {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
                 frontLiftMotor.set(-speed);
+            }
+        }.start();
+    }
+
+    public void frontPostDownStop() {
+        new Thread() {
+            public void run() {
+                frontLiftMotor.set(0);
                 frontBrakeEngage();
                 try {
                     Thread.sleep(300);
@@ -101,6 +126,14 @@ public class Lift {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
                 frontLiftMotor.set(speed);
+            }
+        }.start();
+    }
+
+    public void frontPostUpStop() {
+        new Thread() {
+            public void run() {
+                frontLiftMotor.set(0);
                 frontBrakeEngage();
                 try {
                     Thread.sleep(300);
@@ -118,6 +151,14 @@ public class Lift {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
                 backLiftMotor.set(-speed);
+            }
+        }.start();
+    }
+    
+    public void backPostDownStop() {
+        new Thread() {
+            public void run() {
+                backLiftMotor.set(0);
                 backBrakeEngage();
                 try {
                     Thread.sleep(300);
@@ -125,7 +166,7 @@ public class Lift {
             }
         }.start();
     }
-    
+
     public void backPostUp(double speed) { //Bring back up only this set of wheels
         liftEngaged = false;
         new Thread() {
@@ -135,6 +176,14 @@ public class Lift {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
                 backLiftMotor.set(speed);
+            }
+        }.start();
+    }
+
+    public void backPostUpStop() {
+        new Thread() {
+            public void run() {
+                backLiftMotor.set(0);
                 backBrakeEngage();
                 try {
                     Thread.sleep(300);
@@ -150,18 +199,18 @@ public class Lift {
     }
 
     public void frontBrakeEngage() {
-        // frontLiftBrake.set(Value.kForward);
+        frontLiftBrake.set(Value.kForward);
     }
 
     public void frontBrakeDisengage() {
-        // frontLiftBrake.set(Value.kReverse);
+        frontLiftBrake.set(Value.kReverse);
     }
 
     public void backBrakeEngage() {
-        // backLiftBrake.set(Value.kForward);
+        backLiftBrake.set(Value.kForward);
     }
 
     public void backBrakeDisengage() {
-        // backLiftBrake.set(Value.kReverse);
+        backLiftBrake.set(Value.kReverse);
     }
 }
