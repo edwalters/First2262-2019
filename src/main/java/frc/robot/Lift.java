@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
  * Lifting mechanism on the robot
  */
 public class Lift {
-    boolean liftEngaged;
     WPI_TalonSRX frontLiftMotor;
     WPI_TalonSRX backLiftMotor;
     WPI_VictorSPX leftDriveMotor;
@@ -27,25 +26,35 @@ public class Lift {
     SpeedControllerGroup liftMotors;
     DoubleSolenoid frontLiftBrake;
     DoubleSolenoid backLiftBrake;
+    boolean isFrontBrakeDisenaged;
+    boolean isBackBrakeDisenaged;
 
     public Lift(int idFrontLiftMotor, int idBackLiftMotor, int idLeftDriveMotor, int idRightDriveMotor) {
         frontLiftMotor = new WPI_TalonSRX(idFrontLiftMotor);
+        frontLiftMotor.setInverted(true);
         backLiftMotor = new WPI_TalonSRX(idBackLiftMotor);
         backLiftMotor.setInverted(true);
         leftDriveMotor= new WPI_VictorSPX(idLeftDriveMotor);
+        leftDriveMotor.configNeutralDeadband(.1);
         rightDriveMotor= new WPI_VictorSPX(idRightDriveMotor);
+        rightDriveMotor.setInverted(true);
         liftMotors = new SpeedControllerGroup(frontLiftMotor, backLiftMotor);
         frontLiftBrake = new DoubleSolenoid(6, 7);
         backLiftBrake = new DoubleSolenoid(4, 5);
-        leftDriveMotor.follow(rightDriveMotor);
+        rightDriveMotor.follow(leftDriveMotor);
+        frontBrakeEngage();
+        backBrakeDisengage();
     }
     
     public void liftRobotUp(double speed) { //Push the robot up by putting both sets of wheels down
-        liftEngaged = true;
         new Thread() {
             public void run() {
-                frontBrakeDisengage();
-                backBrakeDisengage();
+                if(!isFrontBrakeDisenaged) {
+                    frontBrakeDisengage();
+                }
+                if(!isBackBrakeDisenaged) {
+                    backBrakeDisengage();
+                }
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) { }
@@ -68,11 +77,14 @@ public class Lift {
     }
     
     public void robotDown() { //Bring both wheels back in at the same time, lowering the bot
-        liftEngaged = false;
         new Thread() {
             public void run() {
-                frontBrakeDisengage();
-                backBrakeDisengage();
+                if(!isFrontBrakeDisenaged) {
+                    frontBrakeDisengage();
+                }
+                if(!isBackBrakeDisenaged) {
+                    backBrakeDisengage();
+                }
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) { }
@@ -97,7 +109,9 @@ public class Lift {
     public void frontPostDown(double speed) { //Put down only this set of wheels
         new Thread() {
             public void run() {
-                frontBrakeDisengage();
+                if(!isFrontBrakeDisenaged) {
+                    frontBrakeDisengage();
+                }
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
@@ -114,6 +128,7 @@ public class Lift {
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
+                frontLiftMotor.set(0);
             }
         }.start();
     }
@@ -121,11 +136,13 @@ public class Lift {
     public void frontPostUp(double speed) { //Bring back up only this set of wheels
         new Thread() {
             public void run() {
-                frontBrakeDisengage();
+                if(!isFrontBrakeDisenaged) {
+                    frontBrakeDisengage();
+                }
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
-                frontLiftMotor.set(speed);
+                frontLiftMotor.set(-1);
             }
         }.start();
     }
@@ -134,19 +151,23 @@ public class Lift {
         new Thread() {
             public void run() {
                 frontLiftMotor.set(0);
-                frontBrakeEngage();
+                if(!isFrontBrakeDisenaged) {
+                    frontBrakeDisengage();
+                }
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
+                frontLiftMotor.set(0);
             }
         }.start();
     }
 
     public void backPostDown(double speed) { //Put down only this set of wheels
-        liftEngaged = true;
         new Thread() {
             public void run() {
-                backBrakeDisengage();
+                if(!isBackBrakeDisenaged) {
+                    backBrakeDisengage();
+                }
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
@@ -163,19 +184,21 @@ public class Lift {
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
+                frontLiftMotor.set(0);
             }
         }.start();
     }
 
     public void backPostUp(double speed) { //Bring back up only this set of wheels
-        liftEngaged = false;
         new Thread() {
             public void run() {
-                backBrakeDisengage();
+                if(!isBackBrakeDisenaged) {
+                    backBrakeDisengage();
+                }
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
-                backLiftMotor.set(speed);
+                frontLiftMotor.set(-1);
             }
         }.start();
     }
@@ -188,29 +211,32 @@ public class Lift {
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) { }
+                frontLiftMotor.set(0);
             }
         }.start();
     }
 
     public void drive(double speed) {
-        if(liftEngaged) {
-            leftDriveMotor.set(ControlMode.PercentOutput, speed); // Controls both this motor and the rightDriveMotor
-        }
+        leftDriveMotor.set(ControlMode.PercentOutput, speed); // Controls both this motor and the rightDriveMotor
     }
 
     public void frontBrakeEngage() {
+        isFrontBrakeDisenaged = false;
         frontLiftBrake.set(Value.kForward);
     }
 
     public void frontBrakeDisengage() {
+        isFrontBrakeDisenaged = true;
         frontLiftBrake.set(Value.kReverse);
     }
 
     public void backBrakeEngage() {
+        isBackBrakeDisenaged = false;
         backLiftBrake.set(Value.kForward);
     }
 
     public void backBrakeDisengage() {
+        isBackBrakeDisenaged = true;
         backLiftBrake.set(Value.kReverse);
     }
 }

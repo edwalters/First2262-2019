@@ -175,11 +175,11 @@ public class Robot extends IterativeRobot {
       lift.backPostUpStop();
     }
 
-    if(controller.getXButton()) {
-      lift.backBrakeEngage();
+    if(controller.getXButton() && dPad == 0) {
+      lift.frontBrakeDisengage();
     }
     
-    if(controller.getYButton()) {
+    if(controller.getYButton() && dPad == 0) {
       lift.backBrakeDisengage();
     }
     
@@ -213,24 +213,16 @@ public class Robot extends IterativeRobot {
       lift.liftRobotUp(leftTrigger);
     }
 
-    if(leftTrigger == 0.0) {
+    if(leftTrigger == 0.0 && dPad != 0) {
       lift.liftRobotUpStop();
     }
 
     if(rightTrigger > 0.0) {
-      lift.backPostDown(rightTrigger);
+      lift.frontPostDown(rightTrigger);
     }
 
-    if(rightTrigger == 0.0) {
-      lift.backPostDownStop();
-    }
-
-    if(dPad == 0) {
-      intake.set(Value.kForward);
-    }
-
-    if(dPad == 180) {
-      intake.set(Value.kReverse);
+    if(rightTrigger == 0.0 && dPad != 0) {
+      lift.frontPostDownStop();
     }
     
     if(dPad == 90) {
