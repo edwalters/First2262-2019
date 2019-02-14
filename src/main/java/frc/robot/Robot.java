@@ -8,6 +8,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Compressor;
@@ -64,12 +65,16 @@ public class Robot extends IterativeRobot {
     // Leaving the liftDrive to sp and spx
     driveMotor1 = new WPI_TalonSRX(1);
     driveMotor1.set(ControlMode.PercentOutput, 0);
+    driveMotor1.setNeutralMode(NeutralMode.Coast);
     driveMotor2 = new WPI_TalonSRX(2);
     driveMotor2.set(ControlMode.PercentOutput, 0);
+    driveMotor2.setNeutralMode(NeutralMode.Coast);
     driveMotor3 = new WPI_TalonSRX(3);
     driveMotor3.set(ControlMode.PercentOutput, 0);
+    driveMotor3.setNeutralMode(NeutralMode.Coast);
     driveMotor4 = new WPI_TalonSRX(4);
     driveMotor4.set(ControlMode.PercentOutput, 0);
+    driveMotor4.setNeutralMode(NeutralMode.Coast);
     leftDrive = new SpeedControllerGroup(driveMotor1, driveMotor2);
     rightDrive = new SpeedControllerGroup(driveMotor3, driveMotor4);
     drive = new DifferentialDrive(leftDrive, rightDrive);

@@ -8,6 +8,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
@@ -36,7 +37,9 @@ public class Lift {
 
     public Lift(int idFrontLiftMotor, int idBackLiftMotor, int idLeftDriveMotor, int idRightDriveMotor) {
         frontLiftMotor = new WPI_TalonSRX(idFrontLiftMotor);
+        frontLiftMotor.setNeutralMode(NeutralMode.Brake);
         backLiftMotor = new WPI_TalonSRX(idBackLiftMotor);
+        backLiftMotor.setNeutralMode(NeutralMode.Brake);
         backLiftMotor.setInverted(true);
         leftDriveMotor= new WPI_VictorSPX(idLeftDriveMotor);
         leftDriveMotor.configNeutralDeadband(.1);
@@ -62,9 +65,6 @@ public class Lift {
             backLiftEncoder.reset();
             backBrakeDisengage();
         }
-
-
-        //liftMotors.set(1);
         frontLiftMotor.set(1);
         backLiftMotor.set(.9);
     }
@@ -81,7 +81,7 @@ public class Lift {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) { }
-                liftMotors.set(0-1);
+                liftMotors.set(-1);
             }
         }.start();
     }   
