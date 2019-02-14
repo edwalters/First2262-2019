@@ -86,6 +86,8 @@ public class Robot extends IterativeRobot {
     pidController = new PIDController(.7, 0, 0, winchEncoder, winchMotor);
     pidController.setSetpoint(0.9);
     pidController.setPercentTolerance(15.0);
+
+
     // vision = new VisionProcessing();
     compressor.start();
   }
@@ -136,20 +138,6 @@ public class Robot extends IterativeRobot {
     Down: 180
     Left: 270
 
-    Controls as of 2/9/19
-    Left Joystick for drive - done
-    Left trigger both lift down - implemented
-    Right trigger back-lift down - implemented
-    A for front-lift up - implemented
-    B for back lift up - implemented
-    Bumpers for elevator - implemented
-    D-pad up for intake open - implemented
-    D-pad down for intake close - implemented
-    D-pad left for intake left
-    D-pad right for intake out
-    Start for start line tracking - Just align, then turn off
-    Back for off
-    Right joystick for second drive, but only when the lift is down (engaged)
 
     */
     double rightTrigger = controller.getTriggerAxis(Hand.kRight);
@@ -160,27 +148,27 @@ public class Robot extends IterativeRobot {
     drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
     
     if(controller.getAButton()) {
-      lift.frontPostUp(1);
+      lift.frontPostUp();
     }
     
     if(controller.getAButtonReleased()) {
-      lift.frontPostUpStop();
+      lift.frontPostStop();
     }
 
     if(controller.getBButton()) {
-      lift.backPostUp(1);
+      lift.backPostUp();
     }
     
     if(controller.getBButtonReleased()) {
-      lift.backPostUpStop();
+      lift.backPostStop();
     }
 
-    if(controller.getXButton() && dPad == 0) {
-      lift.frontBrakeDisengage();
+    if(controller.getXButton()) {
+      intake.set(Value.kForward);
     }
-    
-    if(controller.getYButton() && dPad == 0) {
-      lift.backBrakeDisengage();
+
+    if(controller.getYButton()) {
+      intake.set(Value.kReverse);
     }
     
     if(controller.getBumper(Hand.kLeft)) { // Go down
@@ -210,21 +198,32 @@ public class Robot extends IterativeRobot {
     // }
 
     if(leftTrigger > 0.0) {
-      lift.liftRobotUp(leftTrigger);
+      lift.liftRobotUp();
     }
 
-    if(leftTrigger == 0.0 && dPad != 0) {
-      lift.liftRobotUpStop();
+    if(leftTrigger == 0) {
+      if(!controller.getAButton() || !controller.getBButton() || rightTrigger == 0.0) {
+        lift.liftRobotUpStop();
+      }
     }
 
     if(rightTrigger > 0.0) {
-      lift.frontPostDown(rightTrigger);
+      lift.backPostDown();
     }
 
-    if(rightTrigger == 0.0 && dPad != 0) {
-      lift.frontPostDownStop();
+    if(rightTrigger == 0 && !controller.getBButton() && leftTrigger == 0) {
+      lift.backPostStop();
     }
     
+    if(dPad == 0) {
+      lift.frontBrakeEngage();
+      lift.backBrakeEngage();
+    }
+
+    if(dPad == 180) {
+      lift.backBrakeEngage();
+    }
+
     if(dPad == 90) {
       intakeSlider.set(Value.kForward);
     }
