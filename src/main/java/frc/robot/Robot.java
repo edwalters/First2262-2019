@@ -91,9 +91,7 @@ public class Robot extends IterativeRobot {
     pidController = new PIDController(.7, 0, 0, winchEncoder, winchMotor);
     pidController.setSetpoint(0.9);
     pidController.setPercentTolerance(15.0);
-
-
-    // vision = new VisionProcessing();
+    vision = new VisionProcessing();
     compressor.start();
   }
 
