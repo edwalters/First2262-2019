@@ -7,12 +7,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+
 /**
  * Add your docs here.
  */
 public class VisionProcessing {
     
     public VisionProcessing() {
-        
+        CameraServer.getInstance().startAutomaticCapture();
     }
 }

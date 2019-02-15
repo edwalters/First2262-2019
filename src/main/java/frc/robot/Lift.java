@@ -30,7 +30,6 @@ public class Lift {
     DoubleSolenoid backLiftBrake;
     boolean isFrontBrakeEnaged;
     boolean isBackBrakeEnaged;
-    
     Encoder backLiftEncoder;
     Encoder frontLiftEncoder;
 
