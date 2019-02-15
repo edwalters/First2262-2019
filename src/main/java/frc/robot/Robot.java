@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -58,11 +59,6 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void robotInit() {
-    // 1 victor sp, and 2 victor spxes and 6 talon srxes
-    // winchMotor and the two lift motors NEED to be TalonSRX
-    // Leaving 3 TalonSRX, 1 VictorSP, and 2 VictorSPX
-    // Drive will be 3 talon, 1 spx
-    // Leaving the liftDrive to sp and spx
     driveMotor1 = new WPI_TalonSRX(1);
     driveMotor1.set(ControlMode.PercentOutput, 0);
     driveMotor1.setNeutralMode(NeutralMode.Coast);
@@ -89,10 +85,12 @@ public class Robot extends IterativeRobot {
     elevatorBottomSwitch = new DigitalInput(9);
     controller = new XboxController(0);
     pidController = new PIDController(.7, 0, 0, winchEncoder, winchMotor);
-    pidController.setSetpoint(0.9);
+    pidController.setSetpoint(0.8);
     pidController.setPercentTolerance(15.0);
     vision = new VisionProcessing();
     compressor.start();
+    lift.backBrakeEngage();
+    lift.frontBrakeEngage();
   }
 
   /**
@@ -127,6 +125,51 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    int dPad = controller.getPOV(0);
+
+    drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
+    
+    if(controller.getXButton()) {
+      intake.set(Value.kForward);
+    }
+
+    if(controller.getYButton()) {
+      intake.set(Value.kReverse);
+    }
+
+    if(controller.getBumper(Hand.kLeft)) { // Go down
+      pidController.disable();
+      winchMotor.set(-1);
+    }
+    
+    if(controller.getBumperReleased(Hand.kLeft)) {
+      winchMotor.set(0);
+      
+    }
+    if(controller.getBumper(Hand.kRight)) { // Go up
+      pidController.enable();
+      winchMotor.set(1);
+    }
+    
+    if(controller.getBumperReleased(Hand.kRight)) {
+      winchMotor.set(0);
+    }
+    
+    if(!elevatorTopSwitch.get()) {
+      winchMotor.set(0);
+    }
+
+    if(!elevatorBottomSwitch.get()) {
+      winchMotor.set(0);
+    }
+    
+    if(dPad == 90) {
+      intakeSlider.set(Value.kForward);
+    }
+
+    if(dPad == 270) {
+      intakeSlider.set(Value.kReverse);
+    }
   }
 
   /**
@@ -141,6 +184,20 @@ public class Robot extends IterativeRobot {
     Down: 180
     Left: 270
 
+    Controls as of 2/15/2019
+    Left joystick for drive
+    A button to bring the front post up
+    B button to bring the back post up
+    X/Y button to operate the intake
+    Left bumper to bring the elevator down
+    Right bumper to bring the elevator up and engage the PID
+    Left trigger to lift the robot
+    Right trigger to bring the back post down
+    Dpad up to engage both brakes
+    Dpad down to engage just the back brake
+    Dpad left/right to slide the intake
+    Start/Back for vision on/off
+    Right joystick for second drive
 
     */
     double rightTrigger = controller.getTriggerAxis(Hand.kRight);
@@ -192,13 +249,13 @@ public class Robot extends IterativeRobot {
       winchMotor.set(0);
     }
     
-    // if(!elevatorTopSwitch.get()) {
-      // winchMotor.set(0);
-    // }
+    if(!elevatorTopSwitch.get()) {
+      winchMotor.set(0);
+    }
 
-    // if(!elevatorBottomSwitch.get()) {
-      // winchMotor.set(0);
-    // }
+    if(!elevatorBottomSwitch.get()) {
+      winchMotor.set(0);
+    }
 
     if(leftTrigger > 0.0) {
       lift.liftRobotUp();
@@ -254,6 +311,6 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void testPeriodic() {
-    compressor.start();
+
   }
 }
