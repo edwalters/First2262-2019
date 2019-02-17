@@ -48,8 +48,6 @@ public class Lift {
         frontLiftBrake = new DoubleSolenoid(6, 7);
         backLiftBrake = new DoubleSolenoid(4, 5);
         rightDriveMotor.follow(leftDriveMotor);
-        backLiftEncoder = new Encoder(3, 4);
-        frontLiftEncoder = new Encoder(5, 6);
 
         frontBrakeEngage();
         backBrakeDisengage();

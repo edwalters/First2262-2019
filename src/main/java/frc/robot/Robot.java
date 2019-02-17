@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -118,6 +119,12 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousInit() {
+    double timer = Timer.getFPGATimestamp();
+    while(timer <= 1.5) {
+      drive.arcadeDrive(1, 0);
+      timer = Timer.getFPGATimestamp();
+      System.out.println(timer);
+    }
   }
 
   /**
@@ -231,7 +238,7 @@ public class Robot extends IterativeRobot {
       intake.set(Value.kReverse);
     }
     
-    if(controller.getBumper(Hand.kLeft)) { // Go down
+    if(controller.getBumper(Hand.kLeft) && elevatorBottomSwitch.get()) { // Go down
       pidController.disable();
       winchMotor.set(-1);
     }
@@ -240,8 +247,7 @@ public class Robot extends IterativeRobot {
       winchMotor.set(0);
 
     }
-    if(controller.getBumper(Hand.kRight)) { // Go up
-      pidController.enable();
+    if(controller.getBumper(Hand.kRight) && elevatorTopSwitch.get()) { // Go up
       winchMotor.set(1);
     }
 
@@ -249,11 +255,11 @@ public class Robot extends IterativeRobot {
       winchMotor.set(0);
     }
     
-    if(!elevatorTopSwitch.get()) {
+    if(!elevatorTopSwitch.get() && !controller.getBumper(Hand.kLeft)) {
       winchMotor.set(0);
     }
 
-    if(!elevatorBottomSwitch.get()) {
+    if(!elevatorBottomSwitch.get() && !controller.getBumper(Hand.kRight)) {
       winchMotor.set(0);
     }
 
@@ -293,11 +299,19 @@ public class Robot extends IterativeRobot {
     }
 
     if(controller.getStartButton()) {
-      // vision.startProcessing();
+       vision.startVisionProcessing(drive);
+    }
+
+    if(controller.getStartButtonReleased()) {
+      vision.stop();
     }
 
     if(controller.getBackButton()) {
-      // vision.stop();
+      //  vision.startLineFollow()
+    }
+
+    if(controller.getBackButtonReleased()) {
+      vision.stop();
     }
 
     if(rightJoyStickY != 0) {
