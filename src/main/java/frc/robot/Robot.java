@@ -212,7 +212,7 @@ public class Robot extends IterativeRobot {
     double rightJoyStickY = controller.getY(Hand.kRight);
     int dPad = controller.getPOV(0);
 
-    if(!controller.getStartButton()) {
+    if(!controller.getStartButton() && !controller.getBackButton()) {
       drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
     }
     

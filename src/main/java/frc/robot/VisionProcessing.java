@@ -86,7 +86,7 @@ public class VisionProcessing {
         }
     
         else {
-            drive.arcadeDrive(-.6, 0);
+            drive.arcadeDrive(-.5, 0);
         }
     }
 }
