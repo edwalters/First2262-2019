@@ -88,7 +88,7 @@ public class Robot extends IterativeRobot {
     pidController = new PIDController(.7, 0, 0, winchEncoder, winchMotor);
     pidController.setSetpoint(0.8);
     pidController.setPercentTolerance(15.0);
-    vision = new VisionProcessing();
+    vision = new VisionProcessing(drive);
     compressor.start();
     lift.backBrakeEngage();
     lift.frontBrakeEngage();
@@ -212,7 +212,9 @@ public class Robot extends IterativeRobot {
     double rightJoyStickY = controller.getY(Hand.kRight);
     int dPad = controller.getPOV(0);
 
-    drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
+    if(!controller.getStartButton()) {
+      drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
+    }
     
     if(controller.getAButton()) {
       lift.frontPostUp();
@@ -299,7 +301,7 @@ public class Robot extends IterativeRobot {
     }
 
     if(controller.getStartButton()) {
-       vision.startVisionProcessing(drive);
+      vision.startVisionProcessing();
     }
 
     if(controller.getStartButtonReleased()) {
@@ -307,11 +309,7 @@ public class Robot extends IterativeRobot {
     }
 
     if(controller.getBackButton()) {
-      //  vision.startLineFollow()
-    }
-
-    if(controller.getBackButtonReleased()) {
-      vision.stop();
+      vision.startLineFollow(drive);
     }
 
     if(rightJoyStickY != 0) {
@@ -325,6 +323,10 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void testPeriodic() {
+    if(controller.getX(Hand.kLeft) != 0) {
+      driveMotor1.set(controller.getX(Hand.kLeft));
+    }
+
 
   }
 }

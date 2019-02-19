@@ -8,8 +8,12 @@
 package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
+import edu.wpi.first.networktables.TableEntryListener;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -18,77 +22,71 @@ import edu.wpi.first.networktables.NetworkTableEntry;
  * Add your docs here.
  */
 public class VisionProcessing {
-    DigitalInput lineSensorLeft;
-    DigitalInput lineSensorMiddle;
-    DigitalInput lineSensorRight;
-    boolean lineFollowContinue = true;
-    boolean visionContinue = true;
+    AnalogInput lineSensorLeft;
+    AnalogInput lineSensorMiddle;
+    AnalogInput lineSensorRight;
+    boolean visionContinue = false;
     NetworkTable myContoursTable;
 
     NetworkTableEntry centerX;
     NetworkTableEntry centerY;
+    double center;
 
-    public VisionProcessing() {
+    public VisionProcessing(DifferentialDrive drive) {
         CameraServer.getInstance().startAutomaticCapture();
-        lineSensorLeft = new DigitalInput(6);
-        lineSensorMiddle = new DigitalInput(5);
-        lineSensorRight = new DigitalInput(7);
+        lineSensorLeft = new AnalogInput(2);
+        lineSensorMiddle = new AnalogInput(0);
+        lineSensorRight = new AnalogInput(1);
 
-        myContoursTable = NetworkTableInstance.create().getTable("myContoursReport1");
+        myContoursTable = NetworkTableInstance.getDefault().getTable("GRIP/myContoursReport");
+        myContoursTable.addEntryListener("Centers", (table, key, entry, value, flags)-> {
+            if(value.getDoubleArray().length == 2 && visionContinue) {
+                System.out.println("Center 1: "+value.getDoubleArray()[0]);
+                System.out.println("Center 2: "+value.getDoubleArray()[1]);
+                double foundCenter = value.getDoubleArray()[0]+value.getDoubleArray()[1];
+                foundCenter = foundCenter/2;
+                System.out.println(foundCenter);
+                if(foundCenter > 140 && foundCenter < 180) {
+                    drive.arcadeDrive(-.6, 0);
+                }
+
+                else if(foundCenter > 160) {
+                    drive.arcadeDrive(0, .6);
+                }
+    
+                else if(foundCenter < 160) {
+                    drive.arcadeDrive(0, -.6);
+                }
+                
+            }
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate | EntryListenerFlags.kFlags);
     }
 
-    public void processShapes() {
-
-        NetworkTableEntry centerX =  myContoursTable.getEntry("centerX");
-        NetworkTableEntry centerY =  myContoursTable.getEntry("centerY");
-
-        double x = centerX.getDouble(0.0);
-        double y = centerY.getDouble(0.0);
-       
-        
-    }
-
-    public void startVisionProcessing(DifferentialDrive drive) {
+    public void startVisionProcessing() {
         visionContinue = true;
-        while(visionContinue) {
-            processShapes();
-        }
-        //Turn in a certain direction if the distance between the centers of the two lines are centered in relation to the rest of the robot
-        //Otherwise, go right at 'em
-    }
-
-    public void startLineFollow(DifferentialDrive drive) {
-        lineFollowContinue = true;
-        while(lineFollowContinue) {
-
-            if(lineSensorLeft.get() && !lineSensorMiddle.get() && !lineSensorRight.get()) {
-                drive.arcadeDrive(0, .25);
-            }
-            
-            else if(lineSensorLeft.get() && lineSensorMiddle.get() && !lineSensorRight.get()) {
-                drive.arcadeDrive(0, .25);
-            }
-            
-            else if(!lineSensorLeft.get() && !lineSensorMiddle.get() && lineSensorRight.get()) {
-                drive.arcadeDrive(0, -.25);
-            }
-            
-            else if(!lineSensorLeft.get() && lineSensorMiddle.get() && lineSensorRight.get()) {
-                drive.arcadeDrive(0, -.25);
-            }
-            
-            else if(!lineSensorLeft.get() && !lineSensorMiddle.get() && !lineSensorRight.get()) {
-                drive.arcadeDrive(0, .25);
-            }
-            
-            else {
-                drive.arcadeDrive(.5, 0);
-            }
-        }
     }
 
     public void stop() {
-        lineFollowContinue = false;
         visionContinue = false;
+    }
+
+    public void startLineFollow(DifferentialDrive drive) {
+        System.out.println("Left: " + lineSensorLeft.getValue());
+        System.out.println("Middle: " + lineSensorMiddle.getValue());
+        System.out.println("Right: " + lineSensorRight.getValue());
+        int leftValue = lineSensorLeft.getValue();
+        int middleValue = lineSensorMiddle.getValue();
+        int rightValue = lineSensorRight.getValue();
+        if(leftValue <= middleValue && leftValue < rightValue) {
+            drive.arcadeDrive(0, .6);
+        }
+
+        else if(rightValue <= middleValue && rightValue < leftValue) {
+            drive.arcadeDrive(0, -.6);
+        }
+    
+        else {
+            drive.arcadeDrive(-.6, 0);
+        }
     }
 }

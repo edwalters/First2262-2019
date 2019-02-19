@@ -30,8 +30,6 @@ public class Lift {
     DoubleSolenoid backLiftBrake;
     boolean isFrontBrakeEnaged;
     boolean isBackBrakeEnaged;
-    Encoder backLiftEncoder;
-    Encoder frontLiftEncoder;
 
 
     public Lift(int idFrontLiftMotor, int idBackLiftMotor, int idLeftDriveMotor, int idRightDriveMotor) {
@@ -55,11 +53,9 @@ public class Lift {
     
     public void liftRobotUp() { //Push the robot up by putting both sets of wheels down
         if(isFrontBrakeEnaged) {
-            frontLiftEncoder.reset();
             frontBrakeDisengage();
         }
         if(isBackBrakeEnaged) {
-            backLiftEncoder.reset();
             backBrakeDisengage();
         }
         frontLiftMotor.set(1);
@@ -163,7 +159,6 @@ public class Lift {
 
     public void backBrakeEngage() {
         isBackBrakeEnaged = true;
-        //backLiftEncoder.get();
         backLiftBrake.set(Value.kForward);
     }
 
