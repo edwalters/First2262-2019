@@ -135,7 +135,7 @@ public class Robot extends IterativeRobot {
     double rightJoyStickY = controller.getY(Hand.kRight);
     int dPad = controller.getPOV(0);
 
-    while(timer.get() <= 1.5) {
+    while(timer.get() <= .75) {
       drive.arcadeDrive(-1, 0);
     }
 

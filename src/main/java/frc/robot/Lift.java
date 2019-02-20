@@ -58,7 +58,7 @@ public class Lift {
             backBrakeDisengage();
         }
         frontLiftMotor.set(1);
-        backLiftMotor.set(.9);
+        backLiftMotor.set(1);
     }
 
     public void liftRobotUpStop() {
