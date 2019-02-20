@@ -46,16 +46,16 @@ public class VisionProcessing {
                 double foundCenter = value.getDoubleArray()[0]+value.getDoubleArray()[1];
                 foundCenter = foundCenter/2;
                 System.out.println(foundCenter);
-                if(foundCenter > 140 && foundCenter < 180) {
-                    drive.arcadeDrive(-.5, 0);
+                if(foundCenter > 150 && foundCenter < 170) {
+                    drive.arcadeDrive(-.75, 0);
                 }
 
                 else if(foundCenter > 160) {
-                    drive.arcadeDrive(0, .5);
+                    drive.arcadeDrive(-.5, .5);
                 }
     
                 else if(foundCenter < 160) {
-                    drive.arcadeDrive(0, -.6);
+                    drive.arcadeDrive(-.5, -.5);
                 }
                 
             }

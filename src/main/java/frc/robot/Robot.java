@@ -53,6 +53,7 @@ public class Robot extends IterativeRobot {
   XboxController controller;
   VisionProcessing vision;
   PIDController pidController;
+  Timer timer;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -92,6 +93,8 @@ public class Robot extends IterativeRobot {
     compressor.start();
     lift.backBrakeEngage();
     lift.frontBrakeEngage();
+
+    timer = new Timer();
   }
 
   /**
@@ -119,12 +122,7 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousInit() {
-    double timer = Timer.getFPGATimestamp();
-    while(timer <= 1.5) {
-      drive.arcadeDrive(1, 0);
-      timer = Timer.getFPGATimestamp();
-      System.out.println(timer);
-    }
+    timer.start();
   }
 
   /**
@@ -136,6 +134,10 @@ public class Robot extends IterativeRobot {
     double leftTrigger = controller.getTriggerAxis(Hand.kLeft);
     double rightJoyStickY = controller.getY(Hand.kRight);
     int dPad = controller.getPOV(0);
+
+    while(timer.get() <= 1.5) {
+      drive.arcadeDrive(-1, 0);
+    }
 
     if(!controller.getStartButton() && !controller.getBackButton()) {
       drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
