@@ -132,10 +132,31 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    double rightTrigger = controller.getTriggerAxis(Hand.kRight);
+    double leftTrigger = controller.getTriggerAxis(Hand.kLeft);
+    double rightJoyStickY = controller.getY(Hand.kRight);
     int dPad = controller.getPOV(0);
 
-    drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
+    if(!controller.getStartButton() && !controller.getBackButton()) {
+      drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
+    }
     
+    if(controller.getAButton()) {
+      lift.frontPostUp();
+    }
+    
+    if(controller.getAButtonReleased()) {
+      lift.frontPostStop();
+    }
+
+    if(controller.getBButton()) {
+      lift.backPostUp();
+    }
+    
+    if(controller.getBButtonReleased()) {
+      lift.backPostStop();
+    }
+
     if(controller.getXButton()) {
       intake.set(Value.kForward);
     }
@@ -143,39 +164,81 @@ public class Robot extends IterativeRobot {
     if(controller.getYButton()) {
       intake.set(Value.kReverse);
     }
-
-    if(controller.getBumper(Hand.kLeft)) { // Go down
-      pidController.disable();
+    
+    if(controller.getBumper(Hand.kLeft) && elevatorBottomSwitch.get()) { // Go down
       winchMotor.set(-1);
     }
     
     if(controller.getBumperReleased(Hand.kLeft)) {
       winchMotor.set(0);
-      
+
     }
-    if(controller.getBumper(Hand.kRight)) { // Go up
-      pidController.enable();
+    if(controller.getBumper(Hand.kRight) && elevatorTopSwitch.get()) { // Go up
       winchMotor.set(1);
     }
-    
+
     if(controller.getBumperReleased(Hand.kRight)) {
+      System.out.println("test");
       winchMotor.set(0);
     }
     
-    if(!elevatorTopSwitch.get()) {
+    if(!elevatorTopSwitch.get() && !controller.getBumper(Hand.kLeft)) {
       winchMotor.set(0);
     }
 
-    if(!elevatorBottomSwitch.get()) {
+    if(!elevatorBottomSwitch.get() && !controller.getBumper(Hand.kRight)) {
       winchMotor.set(0);
     }
+
+    if(leftTrigger > 0.0) {
+      lift.liftRobotUp();
+    }
+
+    if(leftTrigger == 0) {
+      if(!controller.getAButton() || !controller.getBButton() || rightTrigger == 0.0) {
+        lift.liftRobotUpStop();
+      }
+    }
+
+    if(rightTrigger > 0.0) {
+      lift.backPostDown();
+    }
+
+    if(rightTrigger == 0 && !controller.getBButton() && leftTrigger == 0) {
+      lift.backPostStop();
+    }
     
+    if(dPad == 0) {
+      lift.frontBrakeEngage();
+      lift.backBrakeEngage();
+    }
+
+    if(dPad == 180) {
+      lift.backBrakeEngage();
+    }
+
     if(dPad == 90) {
       intakeSlider.set(Value.kForward);
     }
 
     if(dPad == 270) {
       intakeSlider.set(Value.kReverse);
+    }
+
+    if(controller.getStartButton()) {
+      vision.startVisionProcessing();
+    }
+
+    if(controller.getStartButtonReleased()) {
+      vision.stop();
+    }
+
+    if(controller.getBackButton()) {
+      vision.startLineFollow(drive);
+    }
+
+    if(rightJoyStickY != 0) {
+      lift.drive(rightJoyStickY);
     }
   }
 
@@ -241,7 +304,6 @@ public class Robot extends IterativeRobot {
     }
     
     if(controller.getBumper(Hand.kLeft) && elevatorBottomSwitch.get()) { // Go down
-      pidController.disable();
       winchMotor.set(-1);
     }
     
@@ -254,6 +316,7 @@ public class Robot extends IterativeRobot {
     }
 
     if(controller.getBumperReleased(Hand.kRight)) {
+      System.out.println("test");
       winchMotor.set(0);
     }
     
@@ -323,10 +386,6 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void testPeriodic() {
-    if(controller.getX(Hand.kLeft) != 0) {
-      driveMotor1.set(controller.getX(Hand.kLeft));
-    }
-
 
   }
 }

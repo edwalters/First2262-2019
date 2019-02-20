@@ -47,11 +47,11 @@ public class VisionProcessing {
                 foundCenter = foundCenter/2;
                 System.out.println(foundCenter);
                 if(foundCenter > 140 && foundCenter < 180) {
-                    drive.arcadeDrive(-.6, 0);
+                    drive.arcadeDrive(-.5, 0);
                 }
 
                 else if(foundCenter > 160) {
-                    drive.arcadeDrive(0, .6);
+                    drive.arcadeDrive(0, .5);
                 }
     
                 else if(foundCenter < 160) {
