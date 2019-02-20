@@ -71,7 +71,7 @@ public class Lift {
                 frontBrakeDisengage();
                 backBrakeDisengage();
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(150);
                 } catch (InterruptedException e) { }
                 liftMotors.set(-1);
             }
@@ -87,7 +87,7 @@ public class Lift {
             public void run() {
                 frontBrakeDisengage();
                 try {
-                    Thread.sleep(300);
+                    Thread.sleep(150);
                 } catch (InterruptedException e) { }
                 frontLiftMotor.set(1);
             }
@@ -99,7 +99,7 @@ public class Lift {
             public void run() {
                 frontBrakeDisengage();
                 try {
-                    Thread.sleep(300);
+                    Thread.sleep(150);
                 } catch (InterruptedException e) { }
                 frontLiftMotor.set(-1);
             }
@@ -117,7 +117,7 @@ public class Lift {
                     backBrakeDisengage();
                 }
                 try {
-                    Thread.sleep(300);
+                    Thread.sleep(150);
                 } catch (InterruptedException e) { }
                 backLiftMotor.set(1);
             }
@@ -131,7 +131,7 @@ public class Lift {
                     backBrakeDisengage();
                 }
                 try {
-                    Thread.sleep(300);
+                    Thread.sleep(150);
                 } catch (InterruptedException e) { }
                 backLiftMotor.set(-1);
             }

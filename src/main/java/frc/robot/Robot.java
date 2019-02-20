@@ -275,9 +275,10 @@ public class Robot extends IterativeRobot {
     double rightTrigger = controller.getTriggerAxis(Hand.kRight);
     double leftTrigger = controller.getTriggerAxis(Hand.kLeft);
     double rightJoyStickY = controller.getY(Hand.kRight);
+    double rightJoyStickX = controller.getX(Hand.kRight);
     int dPad = controller.getPOV(0);
 
-    if(!controller.getStartButton() && !controller.getBackButton()) {
+    if(!controller.getStartButton() && !controller.getBackButton() && rightJoyStickX == 0) {
       drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
     }
     
@@ -379,6 +380,10 @@ public class Robot extends IterativeRobot {
 
     if(rightJoyStickY != 0) {
       lift.drive(rightJoyStickY);
+    }
+
+    if(rightJoyStickX != 0 && rightJoyStickY < .25 && rightJoyStickY > -.25) {
+      drive.arcadeDrive(0, rightJoyStickX/2);
     }
 
   }
