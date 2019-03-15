@@ -60,6 +60,30 @@ public class VisionProcessing {
                 
             }
         }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate | EntryListenerFlags.kFlags);
+
+        myContoursTable = NetworkTableInstance.getDefault().getTable("GRIP/myContoursReport2");
+        myContoursTable.addEntryListener("Centers", (table, key, entry, value, flags)-> {
+            if(value.getDoubleArray().length == 2 && visionContinue) {
+                System.out.println("Center 1: "+value.getDoubleArray()[0]);
+                System.out.println("Center 2: "+value.getDoubleArray()[1]);
+                double foundCenter = value.getDoubleArray()[0]+value.getDoubleArray()[1];
+                foundCenter = foundCenter/2;
+                System.out.println(foundCenter);
+                if(foundCenter > 150 && foundCenter < 170) {
+                    drive.arcadeDrive(-.75, 0);
+                }
+
+                else if(foundCenter > 160) {
+                    drive.arcadeDrive(-.5, .5);
+                }
+    
+                else if(foundCenter < 160) {
+                    drive.arcadeDrive(-.5, -.5);
+                }
+                
+            }
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate | EntryListenerFlags.kFlags);
+
     }
 
     public void startVisionProcessing() {
@@ -71,22 +95,24 @@ public class VisionProcessing {
     }
 
     public void startLineFollow(DifferentialDrive drive) {
-        System.out.println("Left: " + lineSensorLeft.getValue());
-        System.out.println("Middle: " + lineSensorMiddle.getValue());
-        System.out.println("Right: " + lineSensorRight.getValue());
-        int leftValue = lineSensorLeft.getValue();
-        int middleValue = lineSensorMiddle.getValue();
-        int rightValue = lineSensorRight.getValue();
-        if(leftValue <= middleValue && leftValue < rightValue) {
-            drive.arcadeDrive(0, .6);
-        }
+        if(!visionContinue) {
+            System.out.println("Left: " + lineSensorLeft.getValue());
+            System.out.println("Middle: " + lineSensorMiddle.getValue());
+            System.out.println("Right: " + lineSensorRight.getValue());
+            int leftValue = lineSensorLeft.getValue();
+            int middleValue = lineSensorMiddle.getValue();
+            int rightValue = lineSensorRight.getValue();
+            if(leftValue <= middleValue && leftValue < rightValue) {
+                drive.arcadeDrive(0, .6);
+            }
 
-        else if(rightValue <= middleValue && rightValue < leftValue) {
-            drive.arcadeDrive(0, -.6);
-        }
+            else if(rightValue <= middleValue && rightValue < leftValue) {
+                drive.arcadeDrive(0, -.6);
+            }
     
-        else {
-            drive.arcadeDrive(-.5, 0);
+            else {
+                drive.arcadeDrive(-.6, 0);
+            }
         }
     }
 }

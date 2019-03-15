@@ -239,6 +239,10 @@ public class Robot extends IterativeRobot {
       vision.startLineFollow(drive);
     }
 
+    if(controller.getBackButtonReleased()) {
+      vision.stop();
+    }
+
     if(rightJoyStickY != 0) {
       lift.drive(rightJoyStickY);
     }
@@ -378,11 +382,15 @@ public class Robot extends IterativeRobot {
       vision.startLineFollow(drive);
     }
 
+    if(controller.getBackButtonReleased()) {
+      vision.stop();
+    }
+
     if(rightJoyStickY != 0) {
       lift.drive(rightJoyStickY);
     }
 
-    if(rightJoyStickX != 0 && rightJoyStickY < .25 && rightJoyStickY > -.25) {
+    if((rightJoyStickX > .25 || rightJoyStickX < -.25) && rightJoyStickY < .25 && rightJoyStickY > -.25) {
       drive.arcadeDrive(0, rightJoyStickX/2);
     }
 
