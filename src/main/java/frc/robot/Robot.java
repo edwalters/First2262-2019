@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -39,7 +41,7 @@ public class Robot extends IterativeRobot {
   WPI_TalonSRX driveMotor1;
   WPI_TalonSRX driveMotor2;
   WPI_TalonSRX driveMotor3;
-  WPI_TalonSRX driveMotor4;
+  Spark  driveMotor4;
   SpeedControllerGroup leftDrive;
   SpeedControllerGroup rightDrive;
   VictorSP winchMotor;
@@ -47,7 +49,7 @@ public class Robot extends IterativeRobot {
   Lift lift;
   Compressor compressor;
   DoubleSolenoid intake;
-  DoubleSolenoid intakeSlider;
+  Solenoid intakeSlider;
   DigitalInput elevatorTopSwitch;
   DigitalInput elevatorBottomSwitch;
   XboxController controller;
@@ -63,32 +65,27 @@ public class Robot extends IterativeRobot {
   public void robotInit() {
     driveMotor1 = new WPI_TalonSRX(1);
     driveMotor1.set(ControlMode.PercentOutput, 0);
-    driveMotor1.setNeutralMode(NeutralMode.Coast);
+    driveMotor1.setNeutralMode(NeutralMode.Brake);
     driveMotor2 = new WPI_TalonSRX(2);
     driveMotor2.set(ControlMode.PercentOutput, 0);
-    driveMotor2.setNeutralMode(NeutralMode.Coast);
+    driveMotor2.setNeutralMode(NeutralMode.Brake);
     driveMotor3 = new WPI_TalonSRX(3);
+    driveMotor3.setInverted(true);
     driveMotor3.set(ControlMode.PercentOutput, 0);
-    driveMotor3.setNeutralMode(NeutralMode.Coast);
-    driveMotor4 = new WPI_TalonSRX(4);
-    driveMotor4.set(ControlMode.PercentOutput, 0);
-    driveMotor4.setNeutralMode(NeutralMode.Coast);
+    driveMotor3.setNeutralMode(NeutralMode.Brake);
+    driveMotor4 = new Spark(1);
     leftDrive = new SpeedControllerGroup(driveMotor1, driveMotor2);
-    rightDrive = new SpeedControllerGroup(driveMotor3, driveMotor4);
-    drive = new DifferentialDrive(leftDrive, rightDrive);
+    drive = new DifferentialDrive(leftDrive, driveMotor3);
+    
     lift = new Lift(5, 6, 7, 8);
     winchMotor = new VictorSP(0);
     winchMotor.setInverted(true);
-    winchEncoder= new Encoder(1, 2);
     compressor = new Compressor(0);
-    intake = new DoubleSolenoid(0, 1);
-    intakeSlider = new DoubleSolenoid(2, 3);
+    intake = new DoubleSolenoid(1, 0);
+    intakeSlider = new Solenoid(2);
     elevatorTopSwitch = new DigitalInput(8);
     elevatorBottomSwitch = new DigitalInput(9);
     controller = new XboxController(0);
-    pidController = new PIDController(.7, 0, 0, winchEncoder, winchMotor);
-    pidController.setSetpoint(0.8);
-    pidController.setPercentTolerance(15.0);
     vision = new VisionProcessing(drive);
     compressor.start();
     lift.backBrakeEngage();
@@ -137,10 +134,15 @@ public class Robot extends IterativeRobot {
 
     while(timer.get() <= .75) {
       drive.arcadeDrive(-1, 0);
+      driveMotor4.set(-1);
     }
 
     if(!controller.getStartButton() && !controller.getBackButton()) {
       drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
+      driveMotor4.setSpeed(-(-controller.getX(Hand.kLeft) + controller.getY(Hand.kLeft)));
+    }
+    else {
+      driveMotor4.set(0);
     }
     
     if(controller.getAButton()) {
@@ -220,11 +222,11 @@ public class Robot extends IterativeRobot {
     }
 
     if(dPad == 90) {
-      intakeSlider.set(Value.kForward);
+      intakeSlider.set(true);
     }
 
     if(dPad == 270) {
-      intakeSlider.set(Value.kReverse);
+      intakeSlider.set(false);
     }
 
     if(controller.getStartButton()) {
@@ -232,15 +234,15 @@ public class Robot extends IterativeRobot {
     }
 
     if(controller.getStartButtonReleased()) {
-      vision.stop();
+      vision.stop(driveMotor4);
     }
 
     if(controller.getBackButton()) {
-      vision.startLineFollow(drive);
+      vision.startLineFollow(drive, driveMotor4);
     }
 
     if(controller.getBackButtonReleased()) {
-      vision.stop();
+      vision.stop(driveMotor4);
     }
 
     if(rightJoyStickY != 0) {
@@ -282,8 +284,9 @@ public class Robot extends IterativeRobot {
     double rightJoyStickX = controller.getX(Hand.kRight);
     int dPad = controller.getPOV(0);
 
-    if(!controller.getStartButton() && !controller.getBackButton() && (rightJoyStickX < .25 || rightJoyStickX > -.25)) {
+    if(!controller.getStartButton() && !controller.getBackButton()) {
       drive.arcadeDrive(controller.getY(Hand.kLeft), controller.getX(Hand.kLeft));
+      driveMotor4.setSpeed(-(-controller.getX(Hand.kLeft) + controller.getY(Hand.kLeft)));
     }
     
     if(controller.getAButton()) {
@@ -363,11 +366,11 @@ public class Robot extends IterativeRobot {
     }
 
     if(dPad == 90) {
-      intakeSlider.set(Value.kForward);
+      intakeSlider.set(true);
     }
 
     if(dPad == 270) {
-      intakeSlider.set(Value.kReverse);
+      intakeSlider.set(false);
     }
 
     if(controller.getStartButton()) {
@@ -375,15 +378,15 @@ public class Robot extends IterativeRobot {
     }
 
     if(controller.getStartButtonReleased()) {
-      vision.stop();
+      vision.stop(driveMotor4);
     }
 
     if(controller.getBackButton()) {
-      vision.startLineFollow(drive);
+      vision.startLineFollow(drive, driveMotor4);
     }
 
     if(controller.getBackButtonReleased()) {
-      vision.stop();
+      vision.stop(driveMotor4);
     }
 
     if(rightJoyStickY != 0) {
@@ -401,6 +404,11 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void testPeriodic() {
-
+    if(controller.getAButtonPressed()) {
+      lift.frontBrakeDisengage();
+    }
+    if(controller.getBButtonPressed()) {
+      lift.frontBrakeEngage();
+    }
   }
 }

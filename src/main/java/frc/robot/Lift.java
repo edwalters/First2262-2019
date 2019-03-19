@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -42,12 +43,9 @@ public class Lift {
         rightDriveMotor= new WPI_VictorSPX(idRightDriveMotor);
         rightDriveMotor.setInverted(true);
         liftMotors = new SpeedControllerGroup(frontLiftMotor, backLiftMotor);
-        frontLiftBrake = new DoubleSolenoid(6, 7);
+        frontLiftBrake = new DoubleSolenoid(7, 6);
         backLiftBrake = new DoubleSolenoid(4, 5);
         rightDriveMotor.follow(leftDriveMotor);
-
-        frontBrakeEngage();
-        backBrakeDisengage();
     }
     
     public void liftRobotUp() { //Push the robot up by putting both sets of wheels down
@@ -57,8 +55,8 @@ public class Lift {
         if(isBackBrakeEnaged) {
             backBrakeDisengage();
         }
-        frontLiftMotor.set(1);
-        backLiftMotor.set(1);
+            frontLiftMotor.set(1);
+            backLiftMotor.set(1);
     }
 
     public void liftRobotUpStop() {
@@ -89,7 +87,7 @@ public class Lift {
                 try {
                     Thread.sleep(150);
                 } catch (InterruptedException e) { }
-                frontLiftMotor.set(1);
+                    frontLiftMotor.set(1);
             }
         }.start();
     }
@@ -119,7 +117,7 @@ public class Lift {
                 try {
                     Thread.sleep(150);
                 } catch (InterruptedException e) { }
-                backLiftMotor.set(1);
+                    backLiftMotor.set(1);
             }
         }.start();
     }
@@ -143,7 +141,7 @@ public class Lift {
     }
 
     public void drive(double speed) {
-        leftDriveMotor.set(ControlMode.PercentOutput, speed); // Controls both this motor and the rightDriveMotor
+        leftDriveMotor.set(ControlMode.PercentOutput, -speed); // Controls both this motor and the rightDriveMotor
     }
 
     public void frontBrakeEngage() {
